@@ -1,0 +1,7 @@
+require 'board_game_prototyper/bag'
+# require 'board_game_prototyper/block'
+require 'board_game_prototyper/card'
+require 'board_game_prototyper/counter'
+require 'board_game_prototyper/deck'
+require 'board_game_prototyper/die'
+require 'board_game_prototyper/infinite_bag'
