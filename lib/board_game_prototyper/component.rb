@@ -103,7 +103,7 @@ class Component
     base_path = if config
                   File.join(game.output_path, 'images')
                 else
-                  File.join(Rails.root, 'output', 'images')
+                  File.join(game.config_path, 'output', 'images')
                 end
     # Use the guid as a cache busting mechanism so TTS will pull new versions
     path = File.join(base_path, self.class.to_s.underscore.downcase)

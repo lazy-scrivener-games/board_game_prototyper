@@ -9,7 +9,6 @@ require 'board_game_prototyper/components'
 
 require 'json'
 require 'fileutils'
-# require 'board_game_prototyper/dsl'
 
 # CIDEr integration plan
 # CIDEr export and import a json database that uses dexie, which is a wrapper around the browsers indexeddb
@@ -49,34 +48,6 @@ require 'fileutils'
 # game then creates a folder with the game name and dumps the decks and assets (if any)
 # So you can generate a full cider project from a game. Then you can tweak in cider and we will render from the cider files
 # Rendering the cider files will mean we have to use handlebars and run off the cider csv files. So we'll want a step that generates new csv files from the base game config if needed without touching the rest.
-#
-# Maybe move away from models for things like gpu goes in cost string if non zero and use a schema of some sort?
-# fields: [
-#   name: cost
-#   type: collect
-#   subfields: [gpu, cpu, memory, storage, network]
-#   subfield_type: int
-#   filter: 0
-#   output: {v} {k}
-# ]
-#
-# JSON Schema would work for validations, Chris is at least somewhat familiar and we can sort that out
-# For calculated/derived fields:
-#   json logic doesn't let me get key names or really interact with objects much
-#   hocon has subsititutions, but doesn't have filtering
-#   Might be best to have a DSL?
-# deck do
-#   cards 'filename.json/csv'
-#   validates gpu, numericality: true
-#   tag gpu resource
-#   compute cost do |card|
-#     source tags.resource
-#     filter value == 0
-#     reduce do |key, value|
-#       value + " " + key
-#   tags.resource do |resource|
-#     stats resource, average, max, min, count
-#   stats text, length
 
 
 class Game

@@ -4,6 +4,8 @@ PATH
     board_game_prototyper (0.1.0)
       activemodel (~> 7.0.4)
       activesupport (~> 7.0.4)
+      easystats (~> 0.5.0)
+      handlebars-engine (~> 0.3.3)
       imgkit (~> 1.6.2)
 
 GEM
@@ -19,10 +21,18 @@ GEM
     ast (2.4.2)
     concurrent-ruby (1.2.0)
     diff-lcs (1.5.0)
+    easystats (0.5.0)
+    handlebars-engine (0.3.3)
+      handlebars-source
+      mini_racer
+    handlebars-source (4.7.7)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     imgkit (1.6.2)
     json (2.6.3)
+    libv8-node (16.10.0.0-x86_64-linux)
+    mini_racer (0.6.3)
+      libv8-node (~> 16.10.0.0)
     minitest (5.17.0)
     parallel (1.22.1)
     parser (3.2.0.0)

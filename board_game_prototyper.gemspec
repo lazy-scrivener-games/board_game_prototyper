@@ -34,6 +34,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activemodel", "~> 7.0.4"
   spec.add_dependency "activesupport", "~> 7.0.4"
   spec.add_dependency "imgkit", "~> 1.6.2"
+  spec.add_dependency "easystats", "~> 0.5.0"
+  spec.add_dependency "handlebars-engine", "~> 0.3.3"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

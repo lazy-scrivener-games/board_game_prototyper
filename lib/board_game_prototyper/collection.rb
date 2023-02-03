@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'csv'
+require 'easystats'
+require 'board_game_prototyper/config'
 
 class Collection < Component
   extend Forwardable
@@ -151,8 +153,8 @@ class Collection < Component
   end
 
   def parse_component_file(filename)
-    filename = File.join(Rails.root, 'data/decks', filename)
-    if filename.ends_with? '.csv'
+    filename = File.join(game.config_path, 'decks', filename)
+    if filename.end_with? '.csv'
       components_config = CSV.read(filename, headers: true, converters: :numeric, header_converters: :symbol)
       components_config = components_config.map(&:to_h)
     else

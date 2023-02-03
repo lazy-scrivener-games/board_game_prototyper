@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'imgkit'
+require 'handlebars-engine'
 
 class Card < Component
   include ActiveModel::Model
@@ -51,9 +52,13 @@ class Card < Component
 
     puts "Creating back image for #{name} #{guid}"
     puts collection.class
-    html = CardsController.render "cards/_#{back}", locals: { card: self, image: true, side: :back, solo: true }
+    # html = CardsController.render "cards/_#{back}", locals: { card: self, image: true, side: :back, solo: true }
+    handlebars = Handlebars::Engine.new
+    template = File.read(File.join(game.config_path, 'assets', 'card.html'))
+    html = handlebars.compile(template).call(card: self, image: true, side: :back)
     kit = IMGKit.new(html, height: height, width: width)
-    kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
+    # kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
+    kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')
     kit.to_file(target)
 
     target
@@ -90,9 +95,13 @@ class Card < Component
     return target if File.exist?(target)
 
     puts "Creating image for #{name} #{guid}"
-    html = CardsController.render "cards/_#{front}", locals: { card: self, image: true, side: :front }
+    # html = CardsController.render "cards/_#{front}", locals: { card: self, image: true, side: :front }
+    handlebars = Handlebars::Engine.new
+    template = File.read(File.join(game.config_path, 'assets', 'card.html'))
+    html = handlebars.compile(template).call(card: self, image: true, side: :front)
     kit = IMGKit.new(html, width: width)
-    kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
+    # kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
+    kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')
     kit.to_file(target)
 
     target
