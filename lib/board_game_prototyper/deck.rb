@@ -54,14 +54,22 @@ class Deck < Collection
     target = image_path('deck', config: false)
     return target if File.exist?(target)
 
-    html = CardsController.render('cards/deck', assigns: { deck: self, image: true })
+    # html = CardsController.render('cards/deck', assigns: { deck: self, image: true })
+    handlebars = Handlebars::Engine.new
+    handlebars.register_partial(:card, card.handlebars_template)
+    template = File.read(File.join(File.dirname(__FILE__), '..', '..', 'assets', 'deck.html'))
+    ### TODO: Convert object to hash before passing? it's not being converted atm
+    ### Followup, either make compute store in instance variables, or add to a list that also go in attributes
+    html = handlebars.compile(template).call(cards: cards.map(&:attributes), image: true)
+    File.write(File.join(game.config_path, "output", "deck.html"), html)
 
     puts "Creating Deck sheet for #{name} #{guid}"
     puts target
     kit = IMGKit.new(html, width: card.width * row_size, height: card.height * row_count)
     # kit = IMGKit.new(html, width: 1970)
     # Do I need to shell out to imagemagik to crop this?
-    kit.stylesheets << "public/assets/#{Rails.application.assets['card.css'].digest_path}"
+    # kit.stylesheets << "public/assets/#{Rails.application.assets['card.css'].digest_path}"
+    kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')
     kit.to_file(target)
   end
 

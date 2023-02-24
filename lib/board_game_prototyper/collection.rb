@@ -6,12 +6,10 @@ require 'board_game_prototyper/config'
 
 class Collection < Component
   extend Forwardable
-  def_delegators :@components, :each, :<<
+  def_delegators :@components, :each, :<<, :first, :last
   def_delegators :@component_class, :tags
 
-  attr_accessor :component_class
-
-  attr_writer :components
+  set_attrs :component_class, :components
 
   def stats(attr = nil, *stat_methods)
     @stats ||= {}
@@ -40,8 +38,10 @@ class Collection < Component
   def build_component_class(component_fields, subtype = nil)
     klass = Class.new(@component_base_class) do
       @tags = {}
+      @dynamic_attributes = {}
       class << self
-        attr_accessor :tags
+        include BoardGamePrototyper::Dsl
+        set_attrs :tags, :dynamic_attributes
 
         def tts_name(name = nil)
           return @tts_name if name.nil?
@@ -64,13 +64,15 @@ class Collection < Component
         end
 
         def compute(attr, keys, base: false, default: 'this is the default value', &block)
-          define_method(attr) do 
+          attr_accessor(attr)
+          dynamic_attributes[attr] = lambda do |instance|
+          # define_method(attr) do 
             return default unless keys
 
             source = if keys.is_a? Array 
-                       keys.map { |key| [key, instance_variable_get("@#{key}")] }.to_h
+                       keys.map { |key| [key, instance.instance_variable_get("@#{key}")] }.to_h
                      else
-                       instance_variable_get("@#{keys}")
+                       instance.instance_variable_get("@#{keys}")
                      end
 
             return default unless source
@@ -91,6 +93,10 @@ class Collection < Component
       def initialize(attributes = {})
         @tts_name = self.class.tts_name
         super
+        self.class.dynamic_attributes.each_pair do |attr, block|
+          value = instance_eval(&block)
+          instance_variable_set("@#{attr}", value)
+        end
       end
     end
 

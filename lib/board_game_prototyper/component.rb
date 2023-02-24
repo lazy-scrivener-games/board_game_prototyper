@@ -21,7 +21,7 @@ class Component
     @id ||= @game.new_component_id
     generate_guid(attributes.with_indifferent_access)
     @images = false
-    @tags = {}
+    @tags = self.class.tags if self.class.respond_to? :tags
 
     set_fields
     @hands ||= true

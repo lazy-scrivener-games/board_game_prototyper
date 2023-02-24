@@ -5,7 +5,7 @@ require 'handlebars-engine'
 
 class Card < Component
   include ActiveModel::Model
-  attr_accessor :front, :back, :name
+  set_attrs :front, :back, :name, :handlebars_template, :deck
 
   def initialize(attributes = {})
     super
@@ -16,6 +16,8 @@ class Card < Component
     @images = true
     @view_name = '_card'
     @tts_name = 'Card'
+    @handlebars_template = File.read(File.join(game.config_path, 'assets', 'card.html'))
+    @deck = @collection
   end
 
   def ensure_lists
@@ -97,8 +99,7 @@ class Card < Component
     puts "Creating image for #{name} #{guid}"
     # html = CardsController.render "cards/_#{front}", locals: { card: self, image: true, side: :front }
     handlebars = Handlebars::Engine.new
-    template = File.read(File.join(game.config_path, 'assets', 'card.html'))
-    html = handlebars.compile(template).call(card: self, image: true, side: :front)
+    html = handlebars.compile(handlebars_template).call(card: self, image: true, side: :front)
     kit = IMGKit.new(html, width: width)
     # kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
     kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')

@@ -10,6 +10,23 @@ module BoardGamePrototyper
     end
 
     module InstanceMethods
+      def attributes
+        attrs = {}
+        instance_variables.map do |name|
+          key = name.to_s[1..-1]
+          # next if %w[collection game components].include?(key)
+          value = instance_variable_get(name)
+          if value.respond_to? :attributes
+            value = value.attributes
+          end
+          attrs[key] = value
+        end
+        attrs
+      end
+
+      # def set_attrs(*attrs)
+        # self.class.set_attrs(attrs)
+      # end
     end
 
     module ClassMethods
@@ -33,8 +50,6 @@ module BoardGamePrototyper
     end
   end
 end
-puts BoardGamePrototyper::Dsl
-puts BoardGamePrototyper
 
 require 'board_game_prototyper/game'
 GAME = Game.new(components: [], new_save: 'new_save')
