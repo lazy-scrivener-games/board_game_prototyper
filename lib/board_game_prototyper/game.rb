@@ -73,6 +73,49 @@ class Game
 
   end
 
+  def to_s
+    "Game: #{name},  components: #{components.size}"
+  end
+
+  def inspect
+    to_s
+  end
+
+  # TODO this should be shared with component, not copied
+  def recursive_attributes(skip_components=nil)
+    puts '=======,,,,,'
+    puts 'recursive'
+    puts name
+    values = {}
+    attributes.each do |name, value|
+      next if ['errors', 'handlebars_template'].include?(name)
+      next if name == 'components' && skip_components
+      puts '*******'
+      puts value.class
+      object = instance_variable_get("@#{name}")
+      puts name
+      puts object.class
+      if object.is_a? Array
+        puts '*******array'
+        if object.respond_to? 'recursive_attributes'
+          puts 'yes'
+          values[name] = object.recursive_attributes
+        else
+          values[name] = value
+        end
+        puts '------done'
+      end
+
+      if object.respond_to? 'recursive_attributes'
+        puts 'yes'
+        values[name] = object.recursive_attributes
+      else
+        values[name] = value
+      end
+    end
+    values
+  end
+
   def save_target
     File.join(@config_path, @new_save)
   end

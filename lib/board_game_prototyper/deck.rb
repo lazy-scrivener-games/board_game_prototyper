@@ -57,9 +57,12 @@ class Deck < Collection
     # html = CardsController.render('cards/deck', assigns: { deck: self, image: true })
     handlebars = Handlebars::Engine.new
     handlebars.register_partial(:card, card.handlebars_template)
-    template = File.read(File.join(File.dirname(__FILE__), '..', '..', 'assets', 'deck.html'))
-    ### TODO: Convert object to hash before passing? it's not being converted atm
-    ### Followup, either make compute store in instance variables, or add to a list that also go in attributes
+    asset_dir = File.join(File.dirname(__FILE__), '..', '..', 'assets')
+    my_helpers = File.read(File.join(asset_dir, "helpers.js"))
+    context = handlebars.instance_variable_get('@context')
+    context.eval my_helpers
+    template = File.read(File.join(asset_dir, 'deck.html'))
+
     html = handlebars.compile(template).call(cards: cards.map(&:attributes), image: true)
     File.write(File.join(game.config_path, "output", "deck.html"), html)
 

@@ -27,6 +27,48 @@ class Component
     @hands ||= true
   end
 
+  def to_s
+    puts self.class
+    if defined? self.components
+      "#{self.class}: #{name},  components: #{self.components.size}"
+    else
+      "#{self.class}: #{name}"
+    end
+  end
+
+  def inspect
+    to_s
+  end
+
+  def recursive_attributes(skip_components=nil)
+    values = {}
+    attributes.each do |name, value|
+      next if ['errors', 'handlebars_template'].include?(name)
+      next if name == 'components' && skip_components
+      object = instance_variable_get("@#{name}")
+      if object.is_a? Array
+        object.each do |item|
+          if item.respond_to? 'recursive_attributes'
+            values[name] = item.recursive_attributes(skip_components=true)
+          elsif item.is_a? Proc
+            values[name] = instance_eval(&item)
+          else
+            values[name] = item
+          end
+        end
+      end
+
+      if object.respond_to? 'recursive_attributes'
+        values[name] = object.recursive_attributes(skip_components=true)
+      elsif object.is_a? Proc
+        values[name] = instance_eval(&object)
+      else
+        values[name] = value
+      end
+    end
+    values
+  end
+
   def generate_guid(attributes)
     attributes[:game] = "#{attributes[:game].name}-#{attributes[:game].version}"
     attributes[:collection] = collection&.id

@@ -94,7 +94,11 @@ class Collection < Component
         @tts_name = self.class.tts_name
         super
         self.class.dynamic_attributes.each_pair do |attr, block|
-          value = instance_eval(&block)
+          value = if block.is_a? Proc
+                    instance_eval(&block)
+                  else
+                    block
+                  end
           instance_variable_set("@#{attr}", value)
         end
       end
