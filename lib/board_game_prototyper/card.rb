@@ -5,7 +5,7 @@ require 'handlebars-engine'
 
 class Card < Component
   include ActiveModel::Model
-  set_attrs :front, :back, :name, :handlebars_template, :deck
+  set_attrs :front, :back, :name, :handlebars_template, :deck, :back_name
 
   def initialize(attributes = {})
     super
@@ -18,6 +18,7 @@ class Card < Component
     @tts_name = 'Card'
     @handlebars_template = File.read(File.join(game.config_path, 'assets', 'card.html'))
     @deck = @collection
+    @back_name = @collection.name
   end
 
   def ensure_lists
@@ -38,10 +39,6 @@ class Card < Component
     350 * @multiplier
   end
 
-  def back_name
-    collection.name
-  end
-
   def create_images
     return if collection
     create_back
@@ -49,6 +46,8 @@ class Card < Component
   end
 
   def create_back
+    # TODO: Do we actually need to pass config somewhere for a real reason
+    # AKA, is this a Chesterton's Fence?
     target = image_path('back', config: false)
     return target if File.exist?(target)
 
@@ -56,8 +55,9 @@ class Card < Component
     puts collection.class
     # html = CardsController.render "cards/_#{back}", locals: { card: self, image: true, side: :back, solo: true }
     handlebars = Handlebars::Engine.new
-    template = File.read(File.join(game.config_path, 'assets', 'card.html'))
-    html = handlebars.compile(template).call(card: self, image: true, side: :back)
+    template = File.read(File.join(game.config_path, 'assets', 'back.html'))
+    # TODO: `recursive_attributes` here? Why did I add the methods, they're not used...
+    html = handlebars.compile(template).call(card: attributes, image: true, side: :back)
     kit = IMGKit.new(html, height: height, width: width)
     # kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
     kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')

@@ -63,6 +63,7 @@ class Deck < Collection
     context.eval my_helpers
     template = File.read(File.join(asset_dir, 'deck.html'))
 
+    # TODO: I think I can remove the image = true stuff, don't really want to persist the pattern anyway
     html = handlebars.compile(template).call(cards: cards.map(&:attributes), image: true)
     File.write(File.join(game.config_path, "output", "deck.html"), html)
 

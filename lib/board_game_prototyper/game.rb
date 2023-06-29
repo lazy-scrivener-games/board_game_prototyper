@@ -165,7 +165,6 @@ class Game
   def tts_config
     config = JSON.parse(File.read(File.join(@config_path, @base_save))).with_indifferent_access
     config[:SaveName] = "#{name} - #{`date`}".strip
-    puts components
     config[:ObjectStates].concat(components.map(&:tts_config))
 
     FileUtils.mkdir_p(File.join(save_target.split('/')[0..-2]))

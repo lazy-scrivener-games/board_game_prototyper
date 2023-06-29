@@ -28,7 +28,6 @@ class Component
   end
 
   def to_s
-    puts self.class
     if defined? self.components
       "#{self.class}: #{name},  components: #{self.components.size}"
     else
