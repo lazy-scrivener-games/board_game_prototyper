@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-require 'digest'
 
+require 'digest'
 
 class Component
   include ActiveModel::Model
@@ -11,7 +11,6 @@ class Component
   SCALE_FIELDS = %w[scale_x scale_y scale_z]
   set_attrs(:guid, :id, :name, :game, :view_name, :images, *COORDINATES_FIELDS, *COLOR_FIELDS, *SCALE_FIELDS,
             :collection, :tts_name, :hands, :locked, :tags, :disabled)
-
 
   validates :tts_name, presence: true
   validates(*COORDINATES_FIELDS, numericality: true)
@@ -25,11 +24,14 @@ class Component
 
     set_fields
     @hands ||= true
+    # TODO: Can we combine the new_component_id method with adding to the components array?
+    @game.components << self
   end
 
   def to_s
-    if defined? self.components
-      "#{self.class}: #{name},  components: #{self.components.size}"
+    # if respond_to? :components
+    if is_a? Collection
+      "#{self.class}: #{name},  components: #{components.size}"
     else
       "#{self.class}: #{name}"
     end
@@ -39,31 +41,32 @@ class Component
     to_s
   end
 
-  def recursive_attributes(skip_components=nil)
+  def recursive_attributes(skip_components = nil)
     values = {}
     attributes.each do |name, value|
-      next if ['errors', 'handlebars_template'].include?(name)
+      next if %w[errors handlebars_template].include?(name)
       next if name == 'components' && skip_components
+
       object = instance_variable_get("@#{name}")
       if object.is_a? Array
         object.each do |item|
-          if item.respond_to? 'recursive_attributes'
-            values[name] = item.recursive_attributes(skip_components=true)
-          elsif item.is_a? Proc
-            values[name] = instance_eval(&item)
-          else
-            values[name] = item
-          end
+          values[name] = if item.respond_to? 'recursive_attributes'
+                           item.recursive_attributes(skip_components = true)
+                         elsif item.is_a? Proc
+                           instance_eval(&item)
+                         else
+                           item
+                         end
         end
       end
 
-      if object.respond_to? 'recursive_attributes'
-        values[name] = object.recursive_attributes(skip_components=true)
-      elsif object.is_a? Proc
-        values[name] = instance_eval(&object)
-      else
-        values[name] = value
-      end
+      values[name] = if object.respond_to? 'recursive_attributes'
+                       object.recursive_attributes(skip_components = true)
+                     elsif object.is_a? Proc
+                       instance_eval(&object)
+                     else
+                       value
+                     end
     end
     values
   end
@@ -74,7 +77,7 @@ class Component
     attributes[:id] = @id
     # TODO: Work up a non rails based version
     # Dir.glob(File.expand_path(File.dirname(__FILE__)).join('app/assets/stylesheets/*')) do |stylesheet|
-      # attributes[stylesheet] = Rails.application.assets.find_asset(stylesheet).id
+    # attributes[stylesheet] = Rails.application.assets.find_asset(stylesheet).id
     # end
 
     @guid ||= Digest::SHA1.hexdigest(attributes.to_s)[0..5]
@@ -114,9 +117,9 @@ class Component
         z: 0.0
       },
       ColorDiffuse: {
-        r: r,
-        g: g,
-        b: b
+        r:,
+        g:,
+        b:
       },
       LayoutGroupSortIndex: 0,
       Value: 0,
@@ -149,7 +152,7 @@ class Component
     # Use the guid as a cache busting mechanism so TTS will pull new versions
     path = File.join(base_path, self.class.to_s.underscore.downcase)
     FileUtils.mkdir_p(path)
-    File.join(path, "#{name.gsub(' ', '_').downcase}_#{ending}-#{guid}.png")
+    File.join(path, "#{name.gsub(" ", "_").downcase}_#{ending}-#{guid}.png")
   end
 
   def set_fields

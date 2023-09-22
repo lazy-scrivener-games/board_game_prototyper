@@ -49,14 +49,14 @@ require 'fileutils'
 # So you can generate a full cider project from a game. Then you can tweak in cider and we will render from the cider files
 # Rendering the cider files will mean we have to use handlebars and run off the cider csv files. So we'll want a step that generates new csv files from the base game config if needed without touching the rest.
 
-
 class Game
   include ActiveModel::Model
   include BoardGamePrototyper::Dsl
   extend Forwardable
   def_delegators :@components, :each, :<<
 
-  set_attrs(:components, :name, :base_save, :new_save, :version, :output_path, :tts_save_path, :cider_path, :config_path)
+  set_attrs(:components, :name, :base_save, :new_save, :version, :output_path, :tts_save_path, :cider_path,
+            :config_path)
 
   validate :all_guids_unique_and_present
 
@@ -67,10 +67,9 @@ class Game
     @config_path = File.expand_path(File.dirname($0))
 
     # config = JSON.parse(File.read(File.join(@path, @config_file)))
-    components_config = attributes.delete('components')
+    components_config = attributes.delete('components') || []
     super(attributes)
     load_components(components_config)
-
   end
 
   def to_s
@@ -81,15 +80,16 @@ class Game
     to_s
   end
 
-  # TODO this should be shared with component, not copied
-  def recursive_attributes(skip_components=nil)
+  # TODO: this should be shared with component, not copied
+  def recursive_attributes(skip_components = nil)
     puts '=======,,,,,'
     puts 'recursive'
     puts name
     values = {}
     attributes.each do |name, value|
-      next if ['errors', 'handlebars_template'].include?(name)
+      next if %w[errors handlebars_template].include?(name)
       next if name == 'components' && skip_components
+
       puts '*******'
       puts value.class
       object = instance_variable_get("@#{name}")
@@ -120,9 +120,8 @@ class Game
     File.join(@config_path, @new_save)
   end
 
-
   def new_component_id
-    return @next_component_id += 1
+    @next_component_id += 1
   end
 
   def all_guids_unique_and_present
@@ -130,7 +129,10 @@ class Game
     present_guids = guids.compact
     errors.add(:guid, 'Every component must have a guid') if present_guids.size < guids.size
     unique_guids = present_guids.to_set
-    errors.add(:guid, "All GUIDs must be unique, duplicate GUIDs found #{present_guids.sort}") if unique_guids.size < present_guids.size
+    return unless unique_guids.size < present_guids.size
+
+    errors.add(:guid,
+               "All GUIDs must be unique, duplicate GUIDs found #{present_guids.sort}")
   end
 
   def load_components(components)

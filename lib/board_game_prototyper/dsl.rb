@@ -54,6 +54,8 @@ end
 require 'board_game_prototyper/game'
 GAME = Game.new(components: [], new_save: 'new_save')
 
+public
+
 %w[bag deck infinite_bag].each do |type|
   define_method type do |&block|
     component(type, &block)
@@ -73,7 +75,7 @@ def component(name, &block)
   return c if c.disabled
   raise "#{klass} #{c} is invalid: #{c.errors.messages}" if c.invalid?
 
-  c.game.components << c
+  # c.game.components << c
 
   c
 end
