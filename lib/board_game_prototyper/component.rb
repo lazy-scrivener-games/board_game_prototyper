@@ -139,6 +139,7 @@ class Component
     # CardsController.render "tts/#{view_name}", locals: { object: self }
   end
 
+  # TODO: Config true uses output path and config false uses config path?
   def image_path(ending, config: false)
     # When running in docker the path for the file won't be the same as
     # the actual location on the host system that the files will be in

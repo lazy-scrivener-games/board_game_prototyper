@@ -5,6 +5,8 @@ SimpleCov.start
 
 require 'board_game_prototyper/dsl'
 require 'rspec/its'
+require 'pry'
+require 'fakefs/spec_helpers'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
