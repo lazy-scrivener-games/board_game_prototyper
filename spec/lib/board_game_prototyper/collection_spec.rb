@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Component do
-  include FakeFS::SpecHelpers
+RSpec.describe Collection do
+  # include FakeFS::SpecHelpers
   context 'with only game' do
     subject { described_class.new(game: game {}) }
 
@@ -9,7 +9,7 @@ RSpec.describe Component do
   end
 
   context 'with minimum fields' do
-    subject(:component) do
+    subject(:collection) do
       described_class.new(game: Game.new, tts_name: 'tts_name', x: 0, rot_x: 0, y: 0, rot_y: 0, z: 0, rot_z: 0)
     end
 
@@ -38,17 +38,17 @@ RSpec.describe Component do
     its(:collection) { is_expected.to be_nil }
     its(:locked) { is_expected.to be_nil }
     its(:disabled) { is_expected.to be_nil }
-    specify { expect(component.to_s).to eq 'Component: ' }
-    its(:inspect) { is_expected.to eq 'Component: ' }
+    specify { expect(collection.to_s).to eq 'Collection: , components: 0' }
+    its(:inspect) { is_expected.to eq 'Collection: , components: 0' }
 
     it 'cannot get an image path without a name' do
       expect do
-        component.image_path('ending')
+        collection.image_path('ending')
       end.to raise_error(NoMethodError, "undefined method `gsub' for nil:NilClass")
     end
 
     context 'the tts_config' do
-      subject(:tts_config) { component.tts_config }
+      subject(:tts_config) { collection.tts_config }
 
       its([:GUID]) { is_expected.to eq '75ddba' }
       its([:Name]) { is_expected.to be 'tts_name' }
@@ -87,15 +87,24 @@ RSpec.describe Component do
   end
 
   context 'with all fields' do
-    subject(:component) do
-      game = Game.new
-      game.config_path = '/config/path'
-      game.output_path = '/output/path'
-      described_class.new(game:, tts_name: 'tts_name', x: 1, rot_x: 2, y: 3, rot_y: 4, z: 5, rot_z: 6, r: 7,
-                          g: 8, b: 9, scale_x: 10, scale_y: 11, scale_z: 12, guid: 'guid', id: 99, name: 'name',
-                          view_name: 'view_name', images: true, collection: Collection.new(game:), hands: false,
-                          locked: true, disabled: false)
+    subject(:collection) do
+      require_relative 'configs/collection_full'
+      collection_subject
+      # game.config_path = '/config/path'
+      # game.output_path = '/output/path'
+      # collection = described_class.new(game:, tts_name: 'tts_name', x: 1, rot_x: 2, y: 3, rot_y: 4, z: 5, rot_z: 6,
+                          # r: 7, g: 8, b: 9, scale_x: 10, scale_y: 11, scale_z: 12, guid: 'guid', id: 99, name: 'name',
+                          # view_name: 'view_name', images: true, hands: false, component_class: 'component',
+                          # locked: true, disabled: false)
+      # collection.components do
+        # count 5
+        # cost costs.pop
+      # end
+
     end
+
+    let(:components) { 5.times.map { |i| { tts_name: "component #{i}", guid: "comp#{i}", cost: i } } }
+    let(:costs) { 5.times.map { |i| i } }
 
     it { is_expected.to be_valid }
     its(:tts_name) { is_expected.to be 'tts_name' }
@@ -108,7 +117,7 @@ RSpec.describe Component do
     its(:rot_z) { is_expected.to be 6 }
     its(:images) { is_expected.to be false }
     its(:guid) { is_expected.to be 'guid' }
-    its(:guids) { is_expected.to eq ['guid'] }
+    its(:guids) { is_expected.to eq %w[comp0 comp1 comp2 comp3 comp4 guid] }
     its(:hands) { is_expected.to be true }
     its(:id) { is_expected.to eq 99 }
     its(:game) { is_expected.to be_a(Game) }
@@ -119,26 +128,23 @@ RSpec.describe Component do
     its(:scale_x) { is_expected.to eq 10 }
     its(:scale_y) { is_expected.to eq 11 }
     its(:scale_z) { is_expected.to eq 12 }
-    its(:collection) { is_expected.to be_a(Collection) }
+    its(:collection) { is_expected.to be_nil }
     its(:locked) { is_expected.to be true }
     its(:disabled) { is_expected.to be false }
-    specify { expect(component.to_s).to eq 'Component: name' }
-    its(:inspect) { is_expected.to eq 'Component: name' }
+    specify { expect(collection.to_s).to eq 'Collection: name, components: 5' }
+    its(:inspect) { is_expected.to eq 'Collection: name, components: 5' }
 
     its(:recursive_attributes) do # rubocop:disable RSpec/ExampleLength
       is_expected.to eq({
                           'b' => 9,
-                          'collection' => { 'b' => 0.71, 'component_base_class' => described_class,
-                                            'component_type' => 'component', 'g' => 0.71,
-                                            'game' => { 'config_path' => '/config/path', 'next_component_id' => 1,
-                                                        'output_path' => '/output/path' }, 'guid' => 'abf77c',
-                                            'hands' => true, 'id' => 1, 'images' => false, 'r' => 0.71,
-                                            'rot_x' => 0, 'rot_y' => 0, 'rot_z' => 0, 'scale_x' => 1.0,
-                                            'scale_y' => 1.0, 'scale_z' => 1.0, 'x' => 3, 'y' => 0, 'z' => 0 },
+                          'component_base_class' => Component,
+                          'component_class' => 'component',
+                          'component_type' => 'component',
+                          'components' => collection.components,
                           'disabled' => false,
                           'g' => 8,
-                          'game' => { 'config_path' => '/config/path', 'next_component_id' => 1,
-                                      'output_path' => '/output/path' },
+                          'game' => { 'config_path' => '/config/path', 'next_component_id' => 0,
+                                      'output_path' => '/output/path', 'name' => 'game' },
                           'guid' => 'guid',
                           'hands' => true,
                           'id' => 99,
@@ -160,16 +166,20 @@ RSpec.describe Component do
                         })
     end
 
+    it 'generates stats' do
+      expect(collection.stats(:cost)).to eq({ 'cost' => {} })
+    end
+
     it 'generates an image path successfully' do
-      expect(component.image_path('ending')).to eq '/config/path/output/images/component/name_ending-guid.png'
+      expect(collection.image_path('ending')).to eq '/config/path/output/images/collection/name_ending-guid.png'
     end
 
     it 'generates an image path successfully from output path' do
-      expect(component.image_path('ending', config: true)).to eq '/output/path/images/component/name_ending-guid.png'
+      expect(collection.image_path('ending', config: true)).to eq '/output/path/images/collection/name_ending-guid.png'
     end
 
     context 'the tts_config' do
-      subject(:tts_config) { component.tts_config }
+      subject(:tts_config) { collection.tts_config }
 
       its([:GUID]) { is_expected.to be 'guid' }
       its([:Name]) { is_expected.to be 'tts_name' }

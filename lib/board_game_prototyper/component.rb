@@ -23,15 +23,16 @@ class Component
     @tags = self.class.tags if self.class.respond_to? :tags
 
     set_fields
-    @hands ||= true
     # TODO: Can we combine the new_component_id method with adding to the components array?
-    @game.components << self
+    # @game.components << self
+
+    @hands ||= true
   end
 
   def to_s
     # if respond_to? :components
     if is_a? Collection
-      "#{self.class}: #{name},  components: #{components.size}"
+      "#{self.class}: #{name}, components: #{components.size}"
     else
       "#{self.class}: #{name}"
     end
@@ -75,10 +76,6 @@ class Component
     attributes[:game] = "#{attributes[:game].name}-#{attributes[:game].version}"
     attributes[:collection] = collection&.id
     attributes[:id] = @id
-    # TODO: Work up a non rails based version
-    # Dir.glob(File.expand_path(File.dirname(__FILE__)).join('app/assets/stylesheets/*')) do |stylesheet|
-    # attributes[stylesheet] = Rails.application.assets.find_asset(stylesheet).id
-    # end
 
     @guid ||= Digest::SHA1.hexdigest(attributes.to_s)[0..5]
   end

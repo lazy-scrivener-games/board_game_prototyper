@@ -155,7 +155,18 @@ class Collection < Component
     components_config = attributes.delete("#{@component_type}s")
     super
     @hands ||= false
-    load_components(components_config) if components_config
+    # TODO: This might break things
+    # Should I support this, or should we expect you to use the `components` block on the object?
+    if components_config
+      component_fields = components_config[0].keys
+
+      subtype = components_config.delete('component_subtype')
+      build_component_class(component_fields, subtype)
+
+      load_components(components_config)
+    end
+    # End of maybe breaking
+    # load_components(components_config) if components_config
   end
 
   def guids

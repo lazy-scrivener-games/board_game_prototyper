@@ -52,56 +52,13 @@ module BoardGamePrototyper
 end
 
 require 'board_game_prototyper/game'
-GAME = Game.new(components: [], new_save: 'new_save')
 
 public
 
-%w[bag deck infinite_bag].each do |type|
-  define_method type do |&block|
-    component(type, &block)
-  end
-end
-
-def component(name, &block)
-  unless block_given?
-    require_relative(Rails.root.join(name))
-    return
-  end
-
-  klass = name.classify.constantize
-
-  c = klass.new(game: GAME)
-  c.instance_eval(&block)
-  return c if c.disabled
-  raise "#{klass} #{c} is invalid: #{c.errors.messages}" if c.invalid?
-
-  # c.game.components << c
-
-  c
-end
-
-def load_component_file(filename)
-  puts filename
-  require_relative(filename)
-end
-
-def load_component_files(pattern)
-  Dir.glob(pattern, base: GAME.config_path) do |filename|
-    puts filename
-    load_component_file(File.expand_path(File.join(GAME.config_path, filename)))
-  end
-end
-
-def components(filenames)
-  Dir.glob(filenames).each do |file|
-    load_component_file file
-  end
-end
-
-
 def game(&block)
-  GAME.instance_eval(&block)
-  raise "Game #{GAME} is invalid: #{GAME.errors.messages}" if GAME.invalid?
+  game_object = Game.new(name: 'dsl-base', components: [], new_save: 'new_save')
+  game_object.instance_eval(&block)
+  raise "Game #{game_object} is invalid: #{game_object.errors.messages}" if game_object.invalid?
 
-  GAME
+  game_object
 end

@@ -82,32 +82,21 @@ class Game
 
   # TODO: this should be shared with component, not copied
   def recursive_attributes(skip_components = nil)
-    puts '=======,,,,,'
-    puts 'recursive'
-    puts name
     values = {}
     attributes.each do |name, value|
       next if %w[errors handlebars_template].include?(name)
       next if name == 'components' && skip_components
 
-      puts '*******'
-      puts value.class
       object = instance_variable_get("@#{name}")
-      puts name
-      puts object.class
       if object.is_a? Array
-        puts '*******array'
         if object.respond_to? 'recursive_attributes'
-          puts 'yes'
           values[name] = object.recursive_attributes
         else
           values[name] = value
         end
-        puts '------done'
       end
 
       if object.respond_to? 'recursive_attributes'
-        puts 'yes'
         values[name] = object.recursive_attributes
       else
         values[name] = value
@@ -179,5 +168,49 @@ class Game
     target = File.join(tts_save_path, name, "#{name} #{version}.json")
     FileUtils.cp(save_target, target)
     puts "Copied new save to #{target}"
+  end
+  ####### From DSL ######
+  %w[bag deck infinite_bag].each do |type|
+    define_method type do |&block|
+      component(type, &block)
+    end
+  end
+
+  def component(name, &block)
+    unless block_given?
+      require_relative(Rails.root.join(name))
+      return
+    end
+
+    klass = name.classify.constantize
+
+    c = klass.new(game: self)
+    c.instance_eval(&block)
+    return c if c.disabled
+    raise "#{klass} #{c} is invalid: #{c.errors.messages}" if c.invalid?
+
+    components << c
+
+    c
+  end
+
+  def load_component_file(filename)
+    puts filename
+    require_relative(filename)
+  end
+
+  def load_component_files(pattern)
+    Dir.glob(pattern, base: config_path) do |filename|
+      puts filename
+      load_component_file(File.expand_path(File.join(config_path, filename)))
+    end
+  end
+
+  def components(filenames = nil)
+    return @components if filenames.nil?
+
+    Dir.glob(filenames).each do |file|
+      load_component_file file
+    end
   end
 end

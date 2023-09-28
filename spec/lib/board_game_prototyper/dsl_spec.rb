@@ -7,16 +7,10 @@ RSpec.describe BoardGamePrototyper::Dsl do
     end
 
     it 'set the game instance' do
-      game do
+      game_obj = game do
         name 'Foo'
       end
-      expect(GAME.name).to eq('Foo')
+      expect(game_obj.name).to eq('Foo')
     end
-  end
-
-  context :component do
-    subject { :component }
-    specify { expect(public_method subject).to be_truthy }
-
   end
 end
