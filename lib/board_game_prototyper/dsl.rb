@@ -18,6 +18,8 @@ module BoardGamePrototyper
           value = instance_variable_get(name)
           if value.respond_to? :attributes
             value = value.attributes
+          elsif value.is_a? Proc
+            instance_eval(&value)
           end
           attrs[key] = value
         end

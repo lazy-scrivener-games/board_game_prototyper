@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Collection do
-  # include FakeFS::SpecHelpers
+  include FakeFS::SpecHelpers
   context 'with only game' do
     subject { described_class.new(game: game {}) }
 
@@ -93,32 +93,31 @@ RSpec.describe Collection do
       # game.config_path = '/config/path'
       # game.output_path = '/output/path'
       # collection = described_class.new(game:, tts_name: 'tts_name', x: 1, rot_x: 2, y: 3, rot_y: 4, z: 5, rot_z: 6,
-                          # r: 7, g: 8, b: 9, scale_x: 10, scale_y: 11, scale_z: 12, guid: 'guid', id: 99, name: 'name',
-                          # view_name: 'view_name', images: true, hands: false, component_class: 'component',
-                          # locked: true, disabled: false)
+      # r: 7, g: 8, b: 9, scale_x: 10, scale_y: 11, scale_z: 12, guid: 'guid', id: 99, name: 'name',
+      # view_name: 'view_name', images: true, hands: false, component_class: 'component',
+      # locked: true, disabled: false)
       # collection.components do
-        # count 5
-        # cost costs.pop
+      # count 5
+      # cost costs.pop
       # end
-
     end
 
-    let(:components) { 5.times.map { |i| { tts_name: "component #{i}", guid: "comp#{i}", cost: i } } }
-    let(:costs) { 5.times.map { |i| i } }
+    # let(:components) { 5.times.map { |i| { tts_name: "component #{i}", guid: "comp#{i}", cost: i } } }
+    # let(:costs) { 5.times.map { |i| i } }
 
     it { is_expected.to be_valid }
-    its(:tts_name) { is_expected.to be 'tts_name' }
-    its(:name) { is_expected.to be 'name' }
+    its(:tts_name) { is_expected.to be 'Collection Spec Collection TTS' }
+    its(:name) { is_expected.to be 'Collection Spec Collection Name' }
     its(:x) { is_expected.to be 1 }
     its(:rot_x) { is_expected.to be 2 }
     its(:y) { is_expected.to be 3 }
     its(:rot_y) { is_expected.to be 4 }
     its(:z) { is_expected.to be 5 }
     its(:rot_z) { is_expected.to be 6 }
-    its(:images) { is_expected.to be false }
+    its(:images) { is_expected.to be true }
     its(:guid) { is_expected.to be 'guid' }
     its(:guids) { is_expected.to eq %w[comp0 comp1 comp2 comp3 comp4 guid] }
-    its(:hands) { is_expected.to be true }
+    its(:hands) { is_expected.to be false }
     its(:id) { is_expected.to eq 99 }
     its(:game) { is_expected.to be_a(Game) }
     its(:view_name) { is_expected.to be 'view_name' }
@@ -130,27 +129,37 @@ RSpec.describe Collection do
     its(:scale_z) { is_expected.to eq 12 }
     its(:collection) { is_expected.to be_nil }
     its(:locked) { is_expected.to be true }
-    its(:disabled) { is_expected.to be false }
-    specify { expect(collection.to_s).to eq 'Collection: name, components: 5' }
-    its(:inspect) { is_expected.to eq 'Collection: name, components: 5' }
+    its(:disabled) { is_expected.to be_nil }
+    specify { expect(collection.to_s).to eq 'Collection: Collection Spec Collection Name, components: 5' }
+    its(:inspect) { is_expected.to eq 'Collection: Collection Spec Collection Name, components: 5' }
 
     its(:recursive_attributes) do # rubocop:disable RSpec/ExampleLength
       is_expected.to eq({
                           'b' => 9,
                           'component_base_class' => Component,
-                          'component_class' => 'component',
+                          'component_class' => {
+                            'dynamic_attributes' => {
+                              'cost_display' => [
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/collection_full.rb', 40
+                              ],
+                              'guid' => [
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/collection_full.rb', 33
+                              ]
+                            },
+                            'tags' => { 'tag1' => ['cost'] }
+                          },
                           'component_type' => 'component',
                           'components' => collection.components,
-                          'disabled' => false,
                           'g' => 8,
-                          'game' => { 'config_path' => '/config/path', 'next_component_id' => 0,
-                                      'output_path' => '/output/path', 'name' => 'game' },
+                          'game' => { 'config_path' => '/config/path', 'next_component_id' => 1,
+                                      'output_path' => '/output/path', 'name' => 'Collection Spec Game',
+                                      'new_save' => 'new_save', 'validation_context' => nil },
                           'guid' => 'guid',
-                          'hands' => true,
+                          'hands' => false,
                           'id' => 99,
-                          'images' => false,
+                          'images' => true,
                           'locked' => true,
-                          'name' => 'name',
+                          'name' => 'Collection Spec Collection Name',
                           'r' => 7,
                           'rot_x' => 2,
                           'rot_y' => 4,
@@ -158,7 +167,9 @@ RSpec.describe Collection do
                           'scale_x' => 10,
                           'scale_y' => 11,
                           'scale_z' => 12,
-                          'tts_name' => 'tts_name',
+                          'stats' => { 'cost' => { 'max' => 5 } },
+                          'tts_name' => 'Collection Spec Collection TTS',
+                          'validation_context' => nil,
                           'view_name' => 'view_name',
                           'x' => 1,
                           'y' => 3,
@@ -167,22 +178,23 @@ RSpec.describe Collection do
     end
 
     it 'generates stats' do
-      expect(collection.stats(:cost)).to eq({ 'cost' => {} })
+      expect(collection.stats[:cost]).to eq({ 'max' => 5 })
     end
 
     it 'generates an image path successfully' do
-      expect(collection.image_path('ending')).to eq '/config/path/output/images/collection/name_ending-guid.png'
+      expect(collection.image_path('ending')).to eq '/config/path/output/images/collection/collection_spec_collection_name_ending-guid.png'
     end
 
     it 'generates an image path successfully from output path' do
-      expect(collection.image_path('ending', config: true)).to eq '/output/path/images/collection/name_ending-guid.png'
+      expect(collection.image_path('ending',
+                                   config: true)).to eq '/output/path/images/collection/collection_spec_collection_name_ending-guid.png'
     end
 
     context 'the tts_config' do
       subject(:tts_config) { collection.tts_config }
 
       its([:GUID]) { is_expected.to be 'guid' }
-      its([:Name]) { is_expected.to be 'tts_name' }
+      its([:Name]) { is_expected.to be 'Collection Spec Collection TTS' }
       its(%i[Transform posX]) { is_expected.to be 1 }
       its(%i[Transform posY]) { is_expected.to be 3 }
       its(%i[Transform posZ]) { is_expected.to be 5 }
@@ -192,7 +204,7 @@ RSpec.describe Collection do
       its(%i[Transform scaleX]) { is_expected.to be 10 }
       its(%i[Transform scaleY]) { is_expected.to be 11 }
       its(%i[Transform scaleZ]) { is_expected.to be 12 }
-      its([:Nickname]) { is_expected.to be 'name' }
+      its([:Nickname]) { is_expected.to be 'Collection Spec Collection Name' }
       its([:Description]) { is_expected.to be '' }
       its([:GMNotes]) { is_expected.to be '' }
       its(%i[AltLookAngle x]) { is_expected.to be 0.0 }
@@ -212,8 +224,15 @@ RSpec.describe Collection do
       its([:Sticky]) { is_expected.to be true }
       its([:Tooltip]) { is_expected.to be true }
       its([:GridProjection]) { is_expected.to be false }
-      its([:Hands]) { is_expected.to be true }
+      its([:Hands]) { is_expected.to be false }
       its([:XmlUI]) { is_expected.to be '' }
+    end
+
+    context 'the first component' do
+      subject(:first_component) { collection.components.first }
+
+      its(:cost) { is_expected.to be 5 }
+      its(:cost_display) { is_expected.to eq '5 thingies' }
     end
   end
 end

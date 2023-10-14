@@ -13,7 +13,7 @@ class Collection < Component
 
   def stats(attr = nil, *stat_methods)
     @stats ||= {}
-    return @stats if attr.nil?
+    return @stats.with_indifferent_access if attr.nil?
 
     stats = {}
     stat_methods.each do |stat|
@@ -29,7 +29,7 @@ class Collection < Component
         fields = components.map { |component| component.instance_variable_get("@#{attr}") }
       end
       # TODO: better handling for 'X' as a cost
-      fields = fields.filter{|x| !x.is_a? String }
+      fields = fields.filter { |x| !x.is_a? String }
       stats[stat] = fields.instance_eval(stat)
     end
     @stats[attr] = stats
@@ -41,10 +41,11 @@ class Collection < Component
       @dynamic_attributes = {}
       class << self
         include BoardGamePrototyper::Dsl
-        set_attrs :tags, :dynamic_attributes
+        set_attrs :tags, :dynamic_attributes, :foo
 
         def tts_name(name = nil)
           return @tts_name if name.nil?
+
           @tts_name = name
         end
 
@@ -58,18 +59,21 @@ class Collection < Component
             @source = source.dup
           end
 
-          def method_missing(m, *args, &block)
-            @source = @source.send(m, *args, &block)
+          def method_missing(m, *args, &)
+            @source = @source.send(m, *args, &)
           end
         end
 
         def compute(attr, keys, base: false, default: 'this is the default value', &block)
           attr_accessor(attr)
+
+          instance_variable_set("@#{attr}_source", block.source_location)
+
           dynamic_attributes[attr] = lambda do |instance|
-          # define_method(attr) do 
+            # define_method(attr) do
             return default unless keys
 
-            source = if keys.is_a? Array 
+            source = if keys.is_a? Array
                        keys.map { |key| [key, instance.instance_variable_get("@#{key}")] }.to_h
                      else
                        instance.instance_variable_get("@#{keys}")
@@ -85,6 +89,29 @@ class Collection < Component
               rollable.instance_eval(&block)
             end
           end
+        end
+
+        # TODO: Ideally merge this in with the other attributes bits
+        def attributes
+          attrs = {}
+          instance_variables.map do |name|
+            key = name.to_s[1..-1]
+            next if dynamic_attributes.keys.include? key.sub(/_source$/, '')
+
+            value = instance_variable_get(name)
+            if key == 'dynamic_attributes'
+              value.each do |dkey, dvalue|
+                value[dkey] = instance_variable_get("@#{dkey}_source") if dvalue.is_a? Proc
+              end
+            end
+            if value.respond_to? :attributes
+              value = value.attributes
+            elsif value.is_a? Proc
+              instance_eval(&value)
+            end
+            attrs[key] = value
+          end
+          attrs
         end
       end
 
@@ -107,6 +134,7 @@ class Collection < Component
     klass_name = name.gsub(' ', '_').classify
     klass_name += subtype.classify if subtype
 
+    # @component_class = klass
     @component_class = Component.const_set(klass_name, klass)
   end
 
@@ -114,7 +142,7 @@ class Collection < Component
     define_method type do |&block|
       klass = type.classify.constantize
 
-      c = klass.new(game: game)
+      c = klass.new(game:)
       c.instance_eval(&block)
       raise "#{klass} #{c} is invalid: #{c.errors.messages}" if c.invalid?
 
@@ -124,13 +152,13 @@ class Collection < Component
     end
   end
 
-  def component(name:false, &block)
+  def component(fields = [], &)
     return @components[0] unless block_given?
 
-    build_component_class([])
+    build_component_class(fields)
 
-    config = Config.new
-    config.instance_eval(&block) if block_given?
+    config = Config.new(component_class)
+    config.instance_eval(&) if block_given?
     add_component(config)
   end
 
@@ -157,14 +185,15 @@ class Collection < Component
     @hands ||= false
     # TODO: This might break things
     # Should I support this, or should we expect you to use the `components` block on the object?
-    if components_config
-      component_fields = components_config[0].keys
+    return unless components_config
 
-      subtype = components_config.delete('component_subtype')
-      build_component_class(component_fields, subtype)
+    component_fields = components_config[0].keys
 
-      load_components(components_config)
-    end
+    subtype = components_config.delete('component_subtype')
+    build_component_class(component_fields, subtype)
+
+    load_components(components_config)
+
     # End of maybe breaking
     # load_components(components_config) if components_config
   end
@@ -191,9 +220,10 @@ class Collection < Component
     components.map { |component_config| add_component(component_config) }
   end
 
-  def new_component(config)
+  def new_component(config, i)
     config[:collection] = self
     config[:game] = @game
+    config[:i] = i
     klass = config.delete('component_class') || component_class
     klass = klass.classify.constantize if klass.is_a? String
     instance = klass.new(**config)
@@ -204,11 +234,11 @@ class Collection < Component
 
   def add_component(component)
     count = component.delete('count') || 1
-    count.to_i.times do
+    count.to_i.times do |i|
       # Easiest way to do this, Deck 5 had 500-599, deck 11 has 1100-199
       # Don't need to convert to int, just don't wrap with quotes in view
-      component[:id] = "#{id}#{components.size.to_s.rjust(2, '0')}"
-      components << new_component(component)
+      component[:id] = "#{id}#{components.size.to_s.rjust(2, "0")}"
+      components << new_component(component, i)
     end
   end
 

@@ -42,6 +42,7 @@ class Component
     to_s
   end
 
+  # TODO: Merge this with `attributes` in DSL and just have a flag?
   def recursive_attributes(skip_components = nil)
     values = {}
     attributes.each do |name, value|
@@ -49,6 +50,8 @@ class Component
       next if name == 'components' && skip_components
 
       object = instance_variable_get("@#{name}")
+
+
       if object.is_a? Array
         object.each do |item|
           values[name] = if item.respond_to? 'recursive_attributes'
@@ -78,6 +81,7 @@ class Component
     attributes[:id] = @id
 
     @guid ||= Digest::SHA1.hexdigest(attributes.to_s)[0..5]
+    @guid
   end
 
   def guids
