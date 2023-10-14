@@ -183,4 +183,4 @@ class Component
   end
 end
 
-require 'board_game_prototyper/counter'
+# require 'board_game_prototyper/counter'

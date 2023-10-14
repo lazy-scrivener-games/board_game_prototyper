@@ -3,7 +3,7 @@
 RSpec.describe Collection do
   include FakeFS::SpecHelpers
   context 'with only game' do
-    subject { described_class.new(game: game {}) }
+    subject { described_class.new(game: game { name 'Collection Spec Only Game' }) }
 
     it { is_expected.not_to be_valid }
   end
@@ -88,22 +88,13 @@ RSpec.describe Collection do
 
   context 'with all fields' do
     subject(:collection) do
-      require_relative 'configs/collection_full'
+      require_relative '../configs/components/collection/full'
       collection_subject
-      # game.config_path = '/config/path'
-      # game.output_path = '/output/path'
-      # collection = described_class.new(game:, tts_name: 'tts_name', x: 1, rot_x: 2, y: 3, rot_y: 4, z: 5, rot_z: 6,
-      # r: 7, g: 8, b: 9, scale_x: 10, scale_y: 11, scale_z: 12, guid: 'guid', id: 99, name: 'name',
-      # view_name: 'view_name', images: true, hands: false, component_class: 'component',
-      # locked: true, disabled: false)
-      # collection.components do
-      # count 5
-      # cost costs.pop
-      # end
     end
 
-    # let(:components) { 5.times.map { |i| { tts_name: "component #{i}", guid: "comp#{i}", cost: i } } }
-    # let(:costs) { 5.times.map { |i| i } }
+    after do
+      Component.send(:remove_const, :CollectionSpecCollectionName)
+    end
 
     it { is_expected.to be_valid }
     its(:tts_name) { is_expected.to be 'Collection Spec Collection TTS' }
@@ -132,6 +123,7 @@ RSpec.describe Collection do
     its(:disabled) { is_expected.to be_nil }
     specify { expect(collection.to_s).to eq 'Collection: Collection Spec Collection Name, components: 5' }
     its(:inspect) { is_expected.to eq 'Collection: Collection Spec Collection Name, components: 5' }
+    its(:type) { is_expected.to eq 'component/collection_spec_collection_name' }
 
     its(:recursive_attributes) do # rubocop:disable RSpec/ExampleLength
       is_expected.to eq({
@@ -139,12 +131,20 @@ RSpec.describe Collection do
                           'component_base_class' => Component,
                           'component_class' => {
                             'dynamic_attributes' => {
+                              # rubocop:disable  Layout/LineLength
                               'cost_display' => [
-                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/collection_full.rb', 40
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/components/collection/full.rb', 41
+                              ],
+                              'doubled_integers' => [
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/components/collection/full.rb', 47
                               ],
                               'guid' => [
-                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/collection_full.rb', 33
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/components/collection/full.rb', 33
+                              ],
+                              'power_split' => [
+                                '/home/elim/code/board_game_prototyper/spec/lib/board_game_prototyper/configs/components/collection/full.rb', 44
                               ]
+                              # rubocop:enable  Layout/LineLength
                             },
                             'tags' => { 'tag1' => ['cost'] }
                           },
@@ -167,7 +167,7 @@ RSpec.describe Collection do
                           'scale_x' => 10,
                           'scale_y' => 11,
                           'scale_z' => 12,
-                          'stats' => { 'cost' => { 'max' => 5 } },
+                          'stats' => { 'cost' => { 'max' => 5 }, 'power.length' => { 'average' => 12.0, 'min' => 12 } },
                           'tts_name' => 'Collection Spec Collection TTS',
                           'validation_context' => nil,
                           'view_name' => 'view_name',
@@ -177,17 +177,26 @@ RSpec.describe Collection do
                         })
     end
 
-    it 'generates stats' do
+    it 'generates a single stat' do
       expect(collection.stats[:cost]).to eq({ 'max' => 5 })
     end
 
+    it 'generates a stat using a property of a value' do
+      expect(collection.stats['power.length']).to eq({ 'average' => 12.0, 'min' => 12 })
+    end
+
     it 'generates an image path successfully' do
-      expect(collection.image_path('ending')).to eq '/config/path/output/images/collection/collection_spec_collection_name_ending-guid.png'
+      expect(collection.image_path('ending')).to eq(
+        '/config/path/output/images/collection/collection_spec_collection_name_ending-guid.png'
+      )
     end
 
     it 'generates an image path successfully from output path' do
-      expect(collection.image_path('ending',
-                                   config: true)).to eq '/output/path/images/collection/collection_spec_collection_name_ending-guid.png'
+      expect(
+        collection.image_path('ending', config: true)
+      ).to eq(
+        '/output/path/images/collection/collection_spec_collection_name_ending-guid.png'
+      )
     end
 
     context 'the tts_config' do
@@ -233,6 +242,8 @@ RSpec.describe Collection do
 
       its(:cost) { is_expected.to be 5 }
       its(:cost_display) { is_expected.to eq '5 thingies' }
+      its(:power_split) { is_expected.to eq %w[ov rwh lming] }
+      its(:doubled_integers) { is_expected.to eq({ 'cost' => 10 }) }
     end
   end
 end

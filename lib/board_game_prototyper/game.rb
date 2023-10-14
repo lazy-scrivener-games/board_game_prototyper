@@ -3,8 +3,8 @@
 require 'set'
 require 'active_model'
 require 'active_support/core_ext/hash/indifferent_access'
-require 'board_game_prototyper/component'
-require 'board_game_prototyper/collection'
+# require 'board_game_prototyper/component'
+# require 'board_game_prototyper/collection'
 require 'board_game_prototyper/components'
 
 require 'json'

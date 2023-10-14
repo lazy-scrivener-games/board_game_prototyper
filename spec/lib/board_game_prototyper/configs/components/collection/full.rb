@@ -28,7 +28,7 @@ def collection_subject
       images true
       hands false
       locked true
-      component ['cost', 'i'] do
+      component ['cost', 'i', 'power'] do
         count 5
         compute 'guid', 'i', base: true do |i|
           "comp#{i}"
@@ -36,12 +36,21 @@ def collection_subject
         name 'Collection Spec Component'
         tts_name 'Collection Spec Component'
         cost 5
+        power 'overwhelming'
         tag 'cost', 'tag1'
-        compute 'cost_display', 'cost', base: true do |cost|
-          "#{cost} thingies"
+        compute 'cost_display', 'cost' do
+          append ' thingies'
+        end
+        compute 'power_split', 'power' do
+          split('e')
+        end
+        compute 'doubled_integers', ['cost', 'power'] do
+          filter { |_, value| value.is_a? Integer }
+          multiply 2
         end
       end
       stats 'cost', 'max'
+      stats %w[power length], 'min', 'average'
     end
   end
   collection_game.components[0]

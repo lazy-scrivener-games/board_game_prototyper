@@ -2,7 +2,8 @@
 
 require 'csv'
 require 'easystats'
-require 'board_game_prototyper/config'
+require 'board_game_prototyper/util/config'
+require 'board_game_prototyper/util/rollable'
 
 class Collection < Component
   extend Forwardable
@@ -16,23 +17,24 @@ class Collection < Component
     return @stats.with_indifferent_access if attr.nil?
 
     stats = {}
-    stat_methods.each do |stat|
-      if attr.is_a? Array
-        stat_name = attr.join('.')
-        field = attr.shift
-        fields = components.map { |component| component.instance_variable_get("@#{field}") }
-        attr.each do |method|
-          fields = fields.map(&method.to_sym)
-        end
-        attr = stat_name
-      else
-        fields = components.map { |component| component.instance_variable_get("@#{attr}") }
+    stat_name = attr
+    if attr.is_a? Array
+      stat_name = attr.join('.')
+      field = attr.shift
+      fields = components.map { |component| component.instance_variable_get("@#{field}") }
+      attr.each do |method|
+        fields = fields.map(&method.to_sym)
       end
+    else
+      fields = components.map { |component| component.instance_variable_get("@#{attr}") }
+    end
+    stat_methods.each do |stat|
+      # was here
       # TODO: better handling for 'X' as a cost
       fields = fields.filter { |x| !x.is_a? String }
       stats[stat] = fields.instance_eval(stat)
     end
-    @stats[attr] = stats
+    @stats[stat_name] = stats
   end
 
   def build_component_class(component_fields, subtype = nil)
@@ -41,27 +43,11 @@ class Collection < Component
       @dynamic_attributes = {}
       class << self
         include BoardGamePrototyper::Dsl
-        set_attrs :tags, :dynamic_attributes, :foo
-
-        def tts_name(name = nil)
-          return @tts_name if name.nil?
-
-          @tts_name = name
-        end
+        set_attrs :tags, :dynamic_attributes, :tts_name
 
         def tag(attr, tag_name)
           @tags[tag_name] ||= []
           @tags[tag_name].append attr
-        end
-
-        class Rollable
-          def initialize(source)
-            @source = source.dup
-          end
-
-          def method_missing(m, *args, &)
-            @source = @source.send(m, *args, &)
-          end
         end
 
         def compute(attr, keys, base: false, default: 'this is the default value', &block)
