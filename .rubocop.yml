@@ -1,0 +1,26 @@
+require: rubocop-rspec
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  ActiveSupportExtensionsEnabled: true
+
+# Style/StringLiterals:
+  # Enabled: true
+  # EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Layout/LineLength:
+  Max: 120
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - if 
+    - unless
+    - for
+    - the
