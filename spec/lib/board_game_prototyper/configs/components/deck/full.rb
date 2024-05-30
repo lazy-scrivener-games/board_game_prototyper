@@ -2,13 +2,13 @@
 
 require 'board_game_prototyper'
 
-def collection_subject
-  collection_game = game do
+def deck_subject
+  deck_game = game do
     output_path '/output/path'
     config_path '/config/path'
     name 'Collection Spec Game'
-    component 'collection' do
-      name 'Collection Spec Collection Name'
+    deck 'my_deck' do
+      name 'Deck Spec Collection Name'
       tts_name 'Collection Spec Collection TTS'
       x 1
       rot_x 2
@@ -28,10 +28,10 @@ def collection_subject
       images true
       hands false
       locked true
-      component ['cost', 'power'] do
+      component ['cost', 'i', 'power'] do
         count 5
-        compute 'guid', 'collection_number', base: true do |collection_number|
-          "comp#{collection_number}"
+        compute 'guid', 'i', base: true do |i|
+          "comp#{i}"
         end
         name 'Collection Spec Component'
         tts_name 'Collection Spec Component'
@@ -53,5 +53,5 @@ def collection_subject
       stats %w[power length], 'min', 'average'
     end
   end
-  collection_game.components[0]
+  deck_game.components[0]
 end

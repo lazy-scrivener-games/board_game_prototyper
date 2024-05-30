@@ -12,24 +12,25 @@ class Collection < Component
 
   set_attrs :component_class, :components
 
+  def stats_fields(attr)
+    return components.map { |component| component.instance_variable_get("@#{attr}") }, attr unless attr.is_a? Array
+
+    stat_name = attr.join('.')
+    field = attr.shift
+    fields = components.map { |component| component.instance_variable_get("@#{field}") }
+    attr.each do |method|
+      fields = fields.map(&method.to_sym)
+    end
+    [fields, stat_name]
+  end
+
   def stats(attr = nil, *stat_methods)
     @stats ||= {}
     return @stats.with_indifferent_access if attr.nil?
 
     stats = {}
-    stat_name = attr
-    if attr.is_a? Array
-      stat_name = attr.join('.')
-      field = attr.shift
-      fields = components.map { |component| component.instance_variable_get("@#{field}") }
-      attr.each do |method|
-        fields = fields.map(&method.to_sym)
-      end
-    else
-      fields = components.map { |component| component.instance_variable_get("@#{attr}") }
-    end
+    fields, stat_name = stats_fields(attr)
     stat_methods.each do |stat|
-      # was here
       # TODO: better handling for 'X' as a cost
       fields = fields.filter { |x| !x.is_a? String }
       stats[stat] = fields.instance_eval(stat)
@@ -60,7 +61,7 @@ class Collection < Component
             return default unless keys
 
             source = if keys.is_a? Array
-                       keys.map { |key| [key, instance.instance_variable_get("@#{key}")] }.to_h
+                       keys.to_h { |key| [key, instance.instance_variable_get("@#{key}")] }
                      else
                        instance.instance_variable_get("@#{keys}")
                      end
@@ -81,7 +82,7 @@ class Collection < Component
         def attributes
           attrs = {}
           instance_variables.map do |name|
-            key = name.to_s[1..-1]
+            key = name.to_s[1..]
             next if dynamic_attributes.keys.include? key.sub(/_source$/, '')
 
             value = instance_variable_get(name)
@@ -121,7 +122,8 @@ class Collection < Component
     klass_name += subtype.classify if subtype
 
     # @component_class = klass
-    @component_class = Component.const_set(klass_name, klass)
+    @component_class = @component_base_class.const_set(klass_name, klass)
+    # @component_class = Component.const_set(klass_name, klass)
   end
 
   %w[d6].each do |type|
@@ -209,7 +211,8 @@ class Collection < Component
   def new_component(config, i)
     config[:collection] = self
     config[:game] = @game
-    config[:i] = i
+    # Store where we are in the count as collection_number so it can be used
+    config[:collection_number] = i
     klass = config.delete('component_class') || component_class
     klass = klass.classify.constantize if klass.is_a? String
     instance = klass.new(**config)

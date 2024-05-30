@@ -17,6 +17,9 @@ group :development do
   gem 'guard-rspec', '~> 4.7'
   gem 'guard-rubocop', '~> 1.5'
   gem 'pry'
+  gem 'pry-nav'
+  gem 'pry-rescue'
+  gem 'pry-stack_explorer'
   gem 'rubocop', '~> 1.21'
   gem 'rubocop-rspec', '~> 2.24', require: false
   gem 'simplecov', ' ~> 0.22'

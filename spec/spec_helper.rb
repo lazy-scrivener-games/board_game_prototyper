@@ -7,6 +7,7 @@ require 'board_game_prototyper/dsl'
 require 'rspec/its'
 require 'pry'
 require 'fakefs/spec_helpers'
+require 'handlebars-engine'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -19,3 +20,11 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+# FakeFS do
+#   fixtures = File.expand_path('spec/fixtures')
+#   # handlebars = File.expand_path('/home/elim/.rvm/gems/ruby-3.1.3@board_game_prototyper-new/gems/handlebars-source-4.7.7/handlebars.js')
+
+#   FakeFS::FileSystem.clone(fixtures)
+#   # FakeFS::FileSystem.clone(handlebars)
+# end

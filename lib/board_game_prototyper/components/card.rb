@@ -25,10 +25,6 @@ class Card < Component
     @types = @types.split(',').map { |x| x.strip } if @types.is_a? String
   end
 
-  def boxes
-    0
-  end
-
   def width
     # 197
     250 * @multiplier

@@ -10,7 +10,7 @@ class Component
   COLOR_FIELDS = %w[r g b]
   SCALE_FIELDS = %w[scale_x scale_y scale_z]
   set_attrs(:guid, :id, :name, :game, :view_name, :images, *COORDINATES_FIELDS, *COLOR_FIELDS, *SCALE_FIELDS,
-            :collection, :tts_name, :hands, :locked, :tags, :disabled)
+            :collection, :collection_number, :tts_name, :hands, :locked, :tags, :disabled)
 
   validates :tts_name, presence: true
   validates(*COORDINATES_FIELDS, numericality: true)
