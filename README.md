@@ -1,8 +1,10 @@
 # BoardGamePrototyper
 
-TODO: Delete this and the text below, and describe your gem
+## DISCLAIMER
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/board_game_prototyper`. To experiment with that code, run `bin/console` for an interactive prompt.
+This is heavily a work in progress. Nothing is certain to work, keep it's interface/config.
+
+This gem allows you to generate prototypes of board games both for print and TableTop Simulator.
 
 ## Installation
 
@@ -18,7 +20,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+The gem defines a DSL to declare your board game. There is a minimal example in the example folder.
 
 ## Development
 
@@ -28,4 +30,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/board_game_prototyper.
+Bug reports and pull requests are welcome on GitHub at https://github.com/lazy-scrivener-games/board_game_prototyper.
