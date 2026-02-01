@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <script src="./helpers.js"></script>
+  </head>
+  <body>
+    <div class='deck'>
+      {{#each cards}}
+        {{> card card=this image=true side='front'}}
+      {{/each}}
+    </div>
+  </body>
+</html>
