@@ -224,8 +224,9 @@ class Collection < Component
   def add_component(component)
     count = component.delete('count') || 1
     count.to_i.times do |i|
-      # Easiest way to do this, Deck 5 had 500-599, deck 11 has 1100-199
+      # Easiest way to do this, Deck 5 had 500-599, deck 11 has 1100-1199
       # Don't need to convert to int, just don't wrap with quotes in view
+      # TODO: Support collections with more than 100 components
       component[:id] = "#{id}#{components.size.to_s.rjust(2, "0")}"
       components << new_component(component, i)
     end

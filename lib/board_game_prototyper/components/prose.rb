@@ -2,6 +2,7 @@
 
 require 'board_game_prototyper/dsl'
 
+# Prose class
 class Prose < Component
   include BoardGamePrototyper::Dsl
   set_attrs(:text, :number)

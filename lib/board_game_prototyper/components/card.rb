@@ -57,6 +57,9 @@ class Card < Component
     kit = IMGKit.new(html, height: height, width: width)
     # kit.stylesheets << "public/assets/#{Rails.application.assets['solo_card.css'].digest_path}"
     kit.stylesheets << File.join(game.config_path, 'assets', 'card.css')
+    # TODO: wkhtmltoimage-binary gem has not been updated
+    # Will probably need to build a docker with it inside and wrap that as 
+    # a binary to use
     kit.to_file(target)
 
     target

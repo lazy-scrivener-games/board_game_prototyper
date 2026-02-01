@@ -14,10 +14,10 @@ rogue_ai = game do
   cider_path '/home/elim/code/rogue_ai/data/cider'
 
   # Dir.glob('data/decks/*.rb').each do |deck_file|
-    # load_component_file deck_file
+  #   load_component_file deck_file
   # end
   # Dir.glob('data/bags/*.rb').each do |bag_file|
-    # load_component_file bag_file
+  #   load_component_file bag_file
   # end
   component 'counter' do
     name 'Alert'

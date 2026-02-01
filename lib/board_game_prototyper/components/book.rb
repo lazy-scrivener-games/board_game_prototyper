@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Book class
 class Book < Collection
   alias entries components
   alias entry component

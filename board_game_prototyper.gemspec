@@ -36,6 +36,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'easystats', '~> 0.5.0'
   spec.add_dependency 'handlebars-engine', '~> 0.3.3'
   spec.add_dependency 'imgkit', '~> 1.6.2'
+  spec.add_dependency 'rexml', '~> 3.4'
+  spec.add_dependency 'wkhtmltopdf-binary', '~> 0.12.5'
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

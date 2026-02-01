@@ -44,7 +44,7 @@ RSpec.describe Collection do
     it 'cannot get an image path without a name' do
       expect do
         collection.image_path('ending')
-      end.to raise_error(NoMethodError, "undefined method `gsub' for nil:NilClass")
+      end.to raise_error(NoMethodError, "undefined method `gsub' for nil")
     end
 
     context 'the tts_config' do
